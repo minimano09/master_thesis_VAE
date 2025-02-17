@@ -3,31 +3,28 @@ Weekly Report
 
 **Submitted by** Name
 
-**Period** mm/dd/aaaa → mm/dd/aaaa
+**Period** 02/10/2025 → 02/14/2025
 
 Urgent!
 -------
 
-> Immediate feedback or action is needed
+> Nothing urgent things to do
 
 Reminder
 --------
 
-> Stil waiting for...
+> Feedback for my Individual plan from my industrial supervisor
 >
-> Waiting for... since...
+> Finishing 'Background and Related Work' section
 >
-> Waiting for... until...
 
 Issues
 ------
 
-> You shall report here the problems encountered during the reporting period and expected to be resolved in a regular way, with no need for the additional resources. Suggest an action plan.
+> Running the code is sometimes so slow, but we can solve it in the lab by using a massive computer
 
 Daily work
 ----------
-
-> You shall list here your own activities as well as activities of the unit that reports to you for the reporting period. Support your report with facts and numbers highlighting the achieved results.
 
 ### Monday
 
@@ -39,10 +36,15 @@ Daily work
 
 ### Friday
 
+- This week I do not specifically collected my to-do-list daily but I mainly focused on writing the thesis, the individual plan
+- Implemented the S3-VAE model
+- Dig into myself more into the theory of Autoencoders
+
 Plans for next week
 -------------------
 
-> You shall briefly specify what are your next priorities for the next reporting period. Rank them as: important and urgent, just important, and just urgent.
+- Visualise latent space and change my code if it's needed (instead of PCA, reduce the latent dimension for 2)
+- Try to find the optimal architecture -> start to build it up from the simplest one with different parametrization
 
 Requests and proposals
 ----------------------
