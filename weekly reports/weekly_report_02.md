@@ -37,18 +37,19 @@ Daily work
 - Storing results in a new notebook
 
 ### Wednesday
+SICKNESS
 
 ### Thursday
+SICKNESS
 
 ### Friday
-
+SICKNESS
 
 
 Plans for next week
 -------------------
 
-- Visualise latent space and change my code if it's needed (instead of PCA, reduce the latent dimension for 2)
-- Try to find the optimal architecture -> start to build it up from the simplest one with different parametrization
+- continue the implementation of models and try to find a simpler solution
 
 Requests and proposals
 ----------------------
