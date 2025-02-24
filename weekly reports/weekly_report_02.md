@@ -50,8 +50,6 @@ Plans for next week
 -------------------
 
 - continue the implementation of models and try to find a simpler solution
+- try to combine maxpooling and batch normalization in one model
 
-Requests and proposals
-----------------------
 
-> Ideas, suggestions, enquiries for complementary information or requests for the allocation of additional resources.
