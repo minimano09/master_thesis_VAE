@@ -28,11 +28,19 @@ Daily work
 
 ### Monday
 - Talking with Emma about the MS project
+    - cross validation for precision
+    - trying to make prescision 1
+    - we don't know the ground truth, is it okay if the classes are overlapping...
+    - CHANGE COLORS ON THE LATENT SPACE
 - Still implementing more and more complex VAEs -> using MaxPooling OR BatchNorm
 
 ### Tuesday
 - 1-on-1 with Juliette
-- 1-on-1 with Ines
+    - make a deeper image analysis, show the distribution of average and standard deviation
+    - use 2D latent space or 10D latent features with a PCA
+- 1-on-1 with Ines - CANCELLED
+- interesting paper: https://medium.com/@girishajmera/beyond-max-pooling-adopting-strided-convolutions-for-enhanced-anomaly-detection-064ae7985aac
+- 
 
 
 ### Wednesday
