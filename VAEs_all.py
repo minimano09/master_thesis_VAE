@@ -25,7 +25,7 @@ class VAE_MP2(nn.Module):
         # 140 → 70 → 35
         self.final_size = img_size // 4  # 140 // 4 = 35
         # Encoder will output 32 channels
-        self.flat_dim = 32 * (self.final_size ** 2)  # 32 * 35 * 35 = 39200
+        self.flat_dim = 64 * (self.final_size ** 2)  # 32 * 35 * 35 = 39200
 
         # Encoder: Two blocks using MaxPooling
         self.encoder = nn.Sequential(
@@ -35,7 +35,7 @@ class VAE_MP2(nn.Module):
             nn.MaxPool2d(kernel_size=2, stride=2),  # 140 → 70
 
             # Block 2: 70x70 → 35x35
-            nn.Conv2d(32, 32, kernel_size=3, padding=1),
+            nn.Conv2d(32, 64, kernel_size=3, padding=1),
             nn.ReLU(),
             nn.MaxPool2d(kernel_size=2, stride=2)   # 70 → 35
         )
@@ -47,7 +47,7 @@ class VAE_MP2(nn.Module):
 
         # Decoder: Upsample using ConvTranspose2d
         self.decoder = nn.Sequential(
-            nn.ConvTranspose2d(in_channels=32, out_channels=32, 
+            nn.ConvTranspose2d(in_channels=64, out_channels=32, 
                                kernel_size=3, stride=2, padding=1, output_padding=1),  # 35 → 70
             nn.ReLU(),
             nn.ConvTranspose2d(in_channels=32, out_channels=img_channels, 
@@ -57,7 +57,7 @@ class VAE_MP2(nn.Module):
 
     def encode(self, x):
         h = self.encoder(x)  # Expected shape: (batch, 32, 35, 35)
-        h_flat = h.view(x.size(0), -1)  # Flatten: (batch, 39200)
+        h_flat = h.view(x.size(0), -1)  # Flatten
         mu = self.fc_mu(h_flat)
         logvar = self.fc_logvar(h_flat)
         return mu, logvar
@@ -69,7 +69,7 @@ class VAE_MP2(nn.Module):
 
     def decode(self, z):
         h_flat = self.fc_decode(z)  # (batch, 39200)
-        h = h_flat.view(-1, 32, self.final_size, self.final_size)  # Reshape to (batch, 32, 35, 35)
+        h = h_flat.view(-1, 64, self.final_size, self.final_size)  # Reshape to (batch, 32, 35, 35)
         x_recon = self.decoder(h)  # Upsample to (batch, img_channels, 140, 140)
         return x_recon
 
