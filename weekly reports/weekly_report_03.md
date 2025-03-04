@@ -40,17 +40,16 @@ Daily work
     - use 2D latent space or 10D latent features with a PCA
 - 1-on-1 with Ines - CANCELLED
 - interesting paper: https://medium.com/@girishajmera/beyond-max-pooling-adopting-strided-convolutions-for-enhanced-anomaly-detection-064ae7985aac
-- 
 
 
 ### Wednesday
-
+- Fix dimensional problems in the VAEs
 
 ### Thursday
-
+- Studying course material from my first university
 
 ### Friday
-
+- DAY OFF (trip to Gotheburg)
 
 
 Plans for next week
