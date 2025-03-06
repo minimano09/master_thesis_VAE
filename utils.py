@@ -1,55 +1,50 @@
 import torch
 import torch.nn.functional as F
 
-def gaussian_filter(kernel_size=5, sigma=1.0, channels=1):
-    x = torch.arange(-kernel_size // 2 + 1, kernel_size // 2 + 1, dtype=torch.float32)
-    g = torch.exp(-0.5 * (x / sigma)**2)
-    g = g / g.sum()
-    kernel = torch.ger(g, g)  # Outer product to create a 2D Gaussian filter
-    kernel = kernel.unsqueeze(0).unsqueeze(0)  # Add channel dimensions
-    kernel = kernel.repeat(channels, 1, 1, 1)  # Repeat kernel for each channel
-    return kernel
+def gaussian_filter(kernel_size=5, sigma=1.0):  # Use smaller kernel size
+    x = tf.range(-kernel_size // 2 + 1, kernel_size // 2 + 1, dtype=tf.float32)
+    g = tf.exp(-0.5 * (x / sigma)**2)
+    g = g / tf.reduce_sum(g)
+    kernel = tf.tensordot(g, g, axes=0)
+    kernel = tf.expand_dims(tf.expand_dims(kernel, axis=-1), axis=-1)
+    return tf.cast(kernel, tf.float32)
 
 def ssim_single_scale(img1, img2, k1=0.01, k2=0.03, filter_size=3, filter_sigma=1.0, L=1.0):
-    channels = img1.shape[1]  # Get the number of channels
-    kernel = gaussian_filter(kernel_size=filter_size, sigma=filter_sigma, channels=channels).to(img1.device)
-
-    c1 = (k1 * L) ** 2
-    c2 = (k2 * L) ** 2
-
+    kernel = gaussian_filter(kernel_size=filter_size, sigma=filter_sigma)
+    c1 = tf.constant((k1 * L)**2, dtype=tf.float32)
+    c2 = tf.constant((k2 * L)**2, dtype=tf.float32)
     # Mean values
-    mu1 = F.conv2d(img1, kernel, padding="same", groups=channels)
-    mu2 = F.conv2d(img2, kernel, padding="same", groups=channels)
-
+    mu1 = tf.nn.conv2d(img1, kernel, strides=[1, 1, 1, 1], padding="SAME")
+    mu2 = tf.nn.conv2d(img2, kernel, strides=[1, 1, 1, 1], padding="SAME")
     # Variances and covariances
-    mu1_sq = mu1 ** 2
-    mu2_sq = mu2 ** 2
+    mu1_sq = mu1**2
+    mu2_sq = mu2**2
     mu1_mu2 = mu1 * mu2
-    sigma1_sq = F.conv2d(img1 ** 2, kernel, padding="same", groups=channels) - mu1_sq
-    sigma2_sq = F.conv2d(img2 ** 2, kernel, padding="same", groups=channels) - mu2_sq
-    sigma12 = F.conv2d(img1 * img2, kernel, padding="same", groups=channels) - mu1_mu2
-
+    sigma1_sq = tf.nn.conv2d(img1**2, kernel, strides=[1, 1, 1, 1], padding="SAME") - mu1_sq
+    sigma2_sq = tf.nn.conv2d(img2**2, kernel, strides=[1, 1, 1, 1], padding="SAME") - mu2_sq
+    sigma12 = tf.nn.conv2d(img1 * img2, kernel, strides=[1, 1, 1, 1], padding="SAME") - mu1_mu2
     # SSIM calculation
     ssim = ((2 * mu1_mu2 + c1) * (2 * sigma12 + c2)) / ((mu1_sq + mu2_sq + c1) * (sigma1_sq + sigma2_sq + c2))
-    return torch.clamp(ssim, 0, 1)
+    return tf.clip_by_value(ssim, 0, 1)
 
 def ms_ssim(img1, img2, power_factors=[0.0448, 0.2856, 0.3001, 0.2363, 0.1333], filter_size=3, filter_sigma=1.0, L=1.0):
-    img1 = img1.float()
-    img2 = img2.float()
-
+    img1 = tf.cast(img1, tf.float32)  # Ensure float32
+    img2 = tf.cast(img2, tf.float32)  # Ensure float32
     msssim = []
-    weights = torch.tensor(power_factors, dtype=torch.float32, device=img1.device)
-
+    weights = tf.constant(power_factors, dtype=tf.float32)
     for weight in weights[:-1]:  # Loop over all but the last scale
         ssim_map = ssim_single_scale(img1, img2, filter_size=filter_size, filter_sigma=filter_sigma, L=L)
-        msssim.append(weight * ssim_map.mean())
-
+        msssim.append(weight * tf.reduce_mean(ssim_map))
         # Downsample the images
-        img1 = F.avg_pool2d(img1, kernel_size=2, stride=2)
-        img2 = F.avg_pool2d(img2, kernel_size=2, stride=2)
-
+        img1 = tf.nn.avg_pool2d(img1, ksize=2, strides=2, padding="VALID")
+        img2 = tf.nn.avg_pool2d(img2, ksize=2, strides=2, padding="VALID")
     # Compute SSIM for the final scale
     final_ssim = ssim_single_scale(img1, img2, filter_size=filter_size, filter_sigma=filter_sigma, L=L)
-    msssim.append(weights[-1] * final_ssim.mean())
+    msssim.append(weights[-1] * tf.reduce_mean(final_ssim))
+    return tf.reduce_sum(msssim)
 
-    return sum(msssim)
+def ms_ssim_loss(y_true, y_pred):
+    """
+    MS-SSIM-based reconstruction loss.
+    """
+    return 1 - ms_ssim(y_true, y_pred)

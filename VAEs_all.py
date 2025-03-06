@@ -542,3 +542,98 @@ class VAE_StrideConv4(nn.Module):
         mu, logvar = self.encode(x)
         z = self.reparameterize(mu, logvar)
         return self.decode(z), mu, logvar
+    
+
+class VAE_StridedBN4(nn.Module):
+    def __init__(self, img_channels=2, latent_dim=20, img_size=140):
+        super(VAE_StridedBN4, self).__init__()
+        
+        # ---------------------
+        # Encoder: 4 Blocks using strided convolution instead of maxpooling
+        # With kernel_size=3, stride=2, padding=1, each layer roughly halves the spatial dimension.
+        # 140 -> 70 -> 35 -> 18 -> 9 (approximately)
+        # Final feature map will be (256, 9, 9)
+        self.final_size = 9  
+        self.flat_dim = 256 * self.final_size * self.final_size  # 256*9*9
+        
+        self.encoder = nn.Sequential(
+            # Block 1: 140x140 -> 70x70
+            nn.Conv2d(img_channels, 32, kernel_size=3, stride=2, padding=1),
+            nn.BatchNorm2d(32),
+            nn.ReLU(),
+
+            # Block 2: 70x70 -> 35x35
+            nn.Conv2d(32, 64, kernel_size=3, stride=2, padding=1),
+            nn.BatchNorm2d(64),
+            nn.ReLU(),
+
+            # Block 3: 35x35 -> 18x18
+            nn.Conv2d(64, 128, kernel_size=3, stride=2, padding=1),
+            nn.BatchNorm2d(128),
+            nn.ReLU(),
+
+            # Block 4: 18x18 -> 9x9
+            nn.Conv2d(128, 256, kernel_size=3, stride=2, padding=1),
+            nn.BatchNorm2d(256),
+            nn.ReLU()
+        )
+        
+        # ---------------------
+        # Latent Space
+        # ---------------------
+        self.fc_mu = nn.Linear(self.flat_dim, latent_dim)
+        self.fc_logvar = nn.Linear(self.flat_dim, latent_dim)
+        self.fc_decode = nn.Linear(latent_dim, self.flat_dim)
+        
+        # ---------------------
+        # Decoder: Mirror the encoder using ConvTranspose2d layers
+        # The decoder will upsample from 9x9 back to ~128x128, then a final upsample to force 140x140
+        self.decoder = nn.Sequential(
+            # Block 1: 9x9 -> ~18x18
+            nn.ConvTranspose2d(256, 128, kernel_size=4, stride=2, padding=1),
+            nn.BatchNorm2d(128),
+            nn.ReLU(),
+
+            # Block 2: ~18x18 -> ~36x36
+            nn.ConvTranspose2d(128, 64, kernel_size=4, stride=2, padding=1),
+            nn.BatchNorm2d(64),
+            nn.ReLU(),
+
+            # Block 3: ~36x36 -> ~72x72
+            nn.ConvTranspose2d(64, 32, kernel_size=4, stride=2, padding=1),
+            nn.BatchNorm2d(32),
+            nn.ReLU(),
+
+            # Block 4: ~72x72 -> ~144x144
+            nn.ConvTranspose2d(32, img_channels, kernel_size=4, stride=2, padding=1),
+            nn.BatchNorm2d(img_channels),
+            nn.Sigmoid()  # Constrain outputs to [0, 1]
+        )
+        
+        # Final upsampling to force exactly 140x140 (if needed)
+        self.final_upsample = nn.Upsample(size=(img_size, img_size), mode='bilinear', align_corners=False)
+    
+    def encode(self, x):
+        h = self.encoder(x)  # Expected shape: (batch, 256, 9, 9)
+        h_flat = h.view(h.size(0), -1)  # Flatten to (batch, 256*9*9)
+        mu = self.fc_mu(h_flat)
+        logvar = self.fc_logvar(h_flat)
+        return mu, logvar
+    
+    def reparameterize(self, mu, logvar):
+        std = torch.exp(0.5 * logvar)
+        eps = torch.randn_like(std)
+        return mu + eps * std
+    
+    def decode(self, z):
+        h_flat = self.fc_decode(z)  # (batch, 256*9*9)
+        h = h_flat.view(-1, 256, self.final_size, self.final_size)  # Reshape to (batch, 256, 9, 9)
+        x_recon = self.decoder(h)  # Upsample to approximately (batch, img_channels, 144, 144)
+        x_recon = self.final_upsample(x_recon)  # Force to exactly (batch, img_channels, 140, 140)
+        return x_recon
+    
+    def forward(self, x):
+        mu, logvar = self.encode(x)
+        z = self.reparameterize(mu, logvar)
+        recon_x = self.decode(z)
+        return recon_x, mu, logvar
