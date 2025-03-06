@@ -1,9 +1,9 @@
 Weekly Report
 =============
 
-**Submitted by** Name
+**Submitted by** Anna Kovács
 
-**Period** 02/10/2025 → 02/14/2025
+**Period** 02/17/2025 → 02/23/2025
 
 Urgent!
 -------

@@ -1,9 +1,9 @@
 Weekly Report
 =============
 
-**Submitted by** Name
+**Submitted by** Anna Kovács
 
-**Period** 02/10/2025 → 02/14/2025
+**Period** 03/03/2025 → 03/09/2025
 
 Urgent!
 -------
@@ -21,7 +21,7 @@ Reminder
 Issues
 ------
 
-> Running the code is sometimes so slow, but we can solve it in the lab by using a massive computer
+> Results show not that good reconstructions
 
 Daily work
 ----------
@@ -34,20 +34,20 @@ Daily work
 - Studying course material from my first university in the CNN topic
 
 ### Wednesday
-- 
+- Course material studying
 
 ### Thursday
-- 
+- Getting the results of the models
+- Course material studying
 
 ### Friday
-- 
+- Flying home 
 
 
 Plans for next week
 -------------------
 
-- continue the implementation of models and try to find a simpler solution
-- try to combine maxpooling and batch normalization in one model
+- try new architectures or improve the existing ones to make better reconstruction
 
 Requests and proposals
 ----------------------
