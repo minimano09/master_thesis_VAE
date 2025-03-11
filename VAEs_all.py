@@ -637,3 +637,112 @@ class VAE_StridedBN4(nn.Module):
         z = self.reparameterize(mu, logvar)
         recon_x = self.decode(z)
         return recon_x, mu, logvar
+    
+
+class VAE_BN_MP4(nn.Module):
+    def __init__(self, img_channels=2, latent_dim=2, img_size=140):
+        super(VAE_BN_MP4, self).__init__()
+
+        # ---------------------
+        # Calculate final spatial size
+        # ---------------------
+        # Using 4 blocks of MaxPool2d(kernel_size=2, stride=2):
+        # 140 → 70 → 35 → 17 → 8 (floor division in PyTorch).
+        self.final_size = img_size // 16  # Should be 8 if 140 // 16 = 8
+        self.flat_dim = 256 * self.final_size * self.final_size  # 256 * 8 * 8 = 16384
+
+        # ---------------------
+        # Encoder: 4 Blocks (Conv + BN + ReLU + MaxPool)
+        # ---------------------
+        self.encoder = nn.Sequential(
+            # Block 1: 140x140 → 70x70
+            nn.Conv2d(img_channels, 32, kernel_size=3, padding=1),
+            nn.BatchNorm2d(32),
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size=2, stride=2),
+
+            # Block 2: 70x70 → 35x35
+            nn.Conv2d(32, 64, kernel_size=3, padding=1),
+            nn.BatchNorm2d(64),
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size=2, stride=2),
+
+            # Block 3: 35x35 → ~17x17
+            nn.Conv2d(64, 128, kernel_size=3, padding=1),
+            nn.BatchNorm2d(128),
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size=2, stride=2),
+
+            # Block 4: 17x17 → ~8x8
+            nn.Conv2d(128, 256, kernel_size=3, padding=1),
+            nn.BatchNorm2d(256),
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size=2, stride=2)
+        )
+
+        # ---------------------
+        # Latent Space
+        # ---------------------
+        self.fc_mu = nn.Linear(self.flat_dim, latent_dim)
+        self.fc_logvar = nn.Linear(self.flat_dim, latent_dim)
+        self.fc_decode = nn.Linear(latent_dim, self.flat_dim)
+
+        # ---------------------
+        # Decoder: 4 Blocks (ConvTranspose + BN + ReLU)
+        # ---------------------
+        # We'll upsample from 8×8 back to ~128×128, then do a final upsample to 140×140
+        self.decoder = nn.Sequential(
+            # Block 1: 8x8 → ~16x16
+            nn.ConvTranspose2d(256, 128, kernel_size=4, stride=2, padding=1, output_padding=0),
+            nn.BatchNorm2d(128),
+            nn.ReLU(),
+
+            # Block 2: ~16x16 → ~32x32
+            nn.ConvTranspose2d(128, 64, kernel_size=4, stride=2, padding=1, output_padding=0),
+            nn.BatchNorm2d(64),
+            nn.ReLU(),
+
+            # Block 3: ~32x32 → ~64x64
+            nn.ConvTranspose2d(64, 32, kernel_size=4, stride=2, padding=1, output_padding=0),
+            nn.BatchNorm2d(32),
+            nn.ReLU(),
+
+            # Block 4: ~64x64 → ~128x128
+            nn.ConvTranspose2d(32, img_channels, kernel_size=4, stride=2, padding=1, output_padding=0),
+            nn.BatchNorm2d(img_channels),
+            # If you want [0,1] outputs, use Sigmoid:
+            nn.Sigmoid()
+        )
+
+        # Force final output to exactly 140x140
+        self.final_upsample = nn.Upsample(size=(img_size, img_size), mode='bilinear', align_corners=False)
+
+    def encode(self, x):
+        """Encode the input image into latent parameters (mu, logvar)."""
+        h = self.encoder(x)  # (batch, 256, 8, 8) if dimension math is correct
+        h_flat = h.view(h.size(0), -1)  # (batch, 256*8*8)
+        mu = self.fc_mu(h_flat)
+        logvar = self.fc_logvar(h_flat)
+        return mu, logvar
+
+    def reparameterize(self, mu, logvar):
+        """Sample from the latent distribution using the reparameterization trick."""
+        std = torch.exp(0.5 * logvar)
+        eps = torch.randn_like(std)
+        return mu + eps * std
+
+    def decode(self, z):
+        """Decode the latent vector z back to an image."""
+        h_flat = self.fc_decode(z)  # (batch, 256*8*8)
+        h = h_flat.view(-1, 256, self.final_size, self.final_size)  # (batch, 256, 8, 8)
+        x_recon = self.decoder(h)   # ~ (batch, 2, 128, 128)
+        x_recon = self.final_upsample(x_recon)  # (batch, 2, 140, 140)
+        return x_recon
+
+    def forward(self, x):
+        mu, logvar = self.encode(x)
+        z = self.reparameterize(mu, logvar)
+        recon_x = self.decode(z)
+        return recon_x, mu, logvar
+    
+    
