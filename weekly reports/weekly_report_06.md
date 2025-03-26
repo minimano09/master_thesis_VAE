@@ -48,7 +48,7 @@ Daily work
 - Slowly change MP4 model to fit it to the new and smaller data
 
 ### Friday
-- 
+- DAY OFF
 
 
 Plans for next week
