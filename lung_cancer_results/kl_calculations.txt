@@ -1,0 +1,38 @@
+MP2_64:
+    Latent dimension 1: KL divergence to N(0,1) = 0.2342
+    Latent dimension 2: KL divergence to N(0,1) = 0.0579
+
+MP2_128:
+    Latent dimension 0: KL divergence to N(0,1) = 0.0878
+    Latent dimension 1: KL divergence to N(0,1) = 0.2503
+
+MP3_128:
+    Latent dimension 0: KL divergence to N(0,1) = 0.2782
+    Latent dimension 1: KL divergence to N(0,1) = 0.0742
+
+MP3_256:
+    Latent dimension 0: KL divergence to N(0,1) = 0.3151
+    Latent dimension 1: KL divergence to N(0,1) = 0.0854   
+
+MP2_64 with different beta values:
+    - beta = 0.1:
+        Latent dimension 0: KL divergence to N(0,1) = 0.0472
+        Latent dimension 1: KL divergence to N(0,1) = 0.0606
+    - beta = 0.5:
+        Latent dimension 0: KL divergence to N(0,1) = 0.0417
+        Latent dimension 1: KL divergence to N(0,1) = 0.0541
+    - beta = 0.8:
+        Latent dimension 0: KL divergence to N(0,1) = 0.1280
+        Latent dimension 1: KL divergence to N(0,1) = 0.0471
+    - beta = 1:
+        Latent dimension 0: KL divergence to N(0,1) = 0.2342
+        Latent dimension 1: KL divergence to N(0,1) = 0.0579
+    - beta = 1.5:
+        Latent dimension 0: KL divergence to N(0,1) = 0.8299
+        Latent dimension 1: KL divergence to N(0,1) = 0.1042
+    - beta = 2:
+        Latent dimension 0: KL divergence to N(0,1) = 0.3152
+        Latent dimension 1: KL divergence to N(0,1) = 0.2350
+    - beta = 5:
+        Latent dimension 0: KL divergence to N(0,1) = 2.2649
+        Latent dimension 1: KL divergence to N(0,1) = 2.2335
