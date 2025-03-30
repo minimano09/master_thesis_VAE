@@ -24,6 +24,7 @@ MP2_64 with different beta values:
     - beta = 0.8:
         Latent dimension 0: KL divergence to N(0,1) = 0.1280
         Latent dimension 1: KL divergence to N(0,1) = 0.0471
+        !!! Chosen one because reconstruction remain capturing the data essence
     - beta = 1:
         Latent dimension 0: KL divergence to N(0,1) = 0.2342
         Latent dimension 1: KL divergence to N(0,1) = 0.0579
@@ -36,3 +37,4 @@ MP2_64 with different beta values:
     - beta = 5:
         Latent dimension 0: KL divergence to N(0,1) = 2.2649
         Latent dimension 1: KL divergence to N(0,1) = 2.2335
+        !!! if it is more than 0.5 it is not a Gaussian anymore
