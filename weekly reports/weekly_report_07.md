@@ -36,18 +36,23 @@ Daily work
 ### Wednesday
 - Fine-tuning the models with 2 layers 
 - Try to find the best scaling value for the kl loss
+- Train the 4 models and save their losses 
+- Plot the losses to see which has the minimum
 
 ### Thursday
-- 
+- Change the loss plotting function 
+- Implementing a function which calculate the kl divergence on the latent space
 
 ### Friday
-- 
+- Finalizing the lung cancer model and choosing the best beta value for that data
+- Debug the code on the workstation and start to train the MS model (MP4) with different beta values 
+- Write the functions for next week to calculate the kl divergence on the latent space
 
 
 Plans for next week
 -------------------
 
-- try new architectures or improve the existing ones to make better reconstruction
+- try to find the realtion between the setup parameters in case of the 2 winner architecture
 
 Requests and proposals
 ----------------------
