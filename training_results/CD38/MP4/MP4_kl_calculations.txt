@@ -3,6 +3,8 @@
     beta0.1 - KL Divergence (dim 2): 0.2081
 
 - MP4_beta0.5:
+    beta0.5 - KL Divergence (dim 1): 0.1951
+    beta0.5 - KL Divergence (dim 2): 0.1834
 
 - MP4_beta0.8:
     beta0.8 - KL Divergence (dim 1): 0.1608
@@ -13,6 +15,8 @@
     beta1 - KL Divergence (dim 2): 0.1820
 
 - MP4_beta1.5:
+    beta1.5 - KL Divergence (dim 1): 0.1272
+    beta1.5 - KL Divergence (dim 2): 0.1690
 
 - MP4_beta4:
     beta4 - KL Divergence (dim 1): 0.1871
